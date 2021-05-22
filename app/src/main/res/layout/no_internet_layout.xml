@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/no_internet_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_100sdp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/nointernet_connection"/>
+    <TextView
+        android:id="@+id/something_went_wrong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="@dimen/_18sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/no_internet_image"
+        android:text="Something went wrong..."/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/something_went_wrong"
+        android:textSize="@dimen/_12sdp"
+        android:text="An alien is probably blocking your signal"/>
+    <Button
+        android:layout_width="@dimen/_300sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:text="RETRY"
+        android:textSize="@dimen/_14sdp"
+        android:textColor="@color/button_green"
+        android:background="@drawable/custum_button"/>
+
+</RelativeLayout>
