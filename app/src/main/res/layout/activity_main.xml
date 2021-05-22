@@ -6,11 +6,39 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:layout_marginBottom="@dimen/_2sdp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trending"
+            android:layout_gravity="center"
+            android:textSize="@dimen/_22sdp"
+            android:textStyle="bold"
+            android:id="@+id/toolbar_title" />
+        <ImageView
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_marginEnd="@dimen/_5sdp"
+            android:layout_gravity="end"
+            android:src="@drawable/kebab_menu_icon"/>
+    </androidx.appcompat.widget.Toolbar>
+    <include
+        android:id="@+id/repo1"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
-
+        android:layout_width="wrap_content"
+        android:layout_below="@id/my_toolbar"
+        android:layout_marginBottom="@dimen/_2sdp"
+        layout="@layout/repository"/>
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/repo1"
+        layout="@layout/repository"/>
 </RelativeLayout>
