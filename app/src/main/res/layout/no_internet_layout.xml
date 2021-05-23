@@ -28,6 +28,7 @@
         android:textSize="@dimen/_12sdp"
         android:text="An alien is probably blocking your signal"/>
     <Button
+        android:id="@+id/retry_button"
         android:layout_width="@dimen/_300sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginBottom="@dimen/_20sdp"

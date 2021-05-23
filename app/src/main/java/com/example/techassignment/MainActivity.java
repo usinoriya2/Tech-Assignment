@@ -7,10 +7,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -36,7 +38,9 @@ import java.util.logging.Logger;
 public class MainActivity extends AppCompatActivity {
     private ShimmerFrameLayout shimmerFrameLayout;
     private SwipeRefreshLayout pullToRefresh;
+    private RelativeLayout noInternetLayout;
     private LinearLayout repoLayout;
+    private Button retryButton;
     private Handler handler;
     private Runnable r;
     private JsonArrayRequest mJsonArrayRequest;
@@ -52,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private void bindViews(){
         shimmerFrameLayout = findViewById(R.id.shimmerFrameLayout);
         repoLayout = findViewById(R.id.repo_layout);
+        noInternetLayout = findViewById(R.id.no_internet_layout);
+        retryButton = findViewById(R.id.retry_button);
         pullToRefresh = findViewById(R.id.pull_to_refresh);
 
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -61,10 +67,19 @@ public class MainActivity extends AppCompatActivity {
                 pullToRefresh.setRefreshing(false);
             }
         });
+
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getRepositoryData();
+            }
+        });
+
     }
 
 
     private void getRepositoryData(){
+        noInternetLayout.setVisibility(View.GONE);
         shimmerFrameLayout.setVisibility(View.VISIBLE);
         shimmerFrameLayout.startShimmerAnimation();
         repoLayout.removeAllViews();
@@ -72,24 +87,14 @@ public class MainActivity extends AppCompatActivity {
                 "https://private-anon-cf6ffd2614-githubtrendingapi.apiary-mock.com/repositories", new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                List<Repository> repositoryList = new ArrayList<>();
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        JSONObject jsonObject = response.getJSONObject(i);
-                        Repository repository = new Repository(jsonObject.getString("author"),jsonObject.getString("name"),jsonObject.getString("avatar"),
-                                jsonObject.getString("url"),jsonObject.getString("description"),jsonObject.getString("language"),jsonObject.getString("languageColor"),
-                                jsonObject.getInt("stars"),jsonObject.getInt("forks"),jsonObject.getInt("currentPeriodStars"));
-                        repositoryList.add(repository);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                setRepositoryData(repositoryList);
+                setRepositoryData(response);
+                checkAndSaveCache(response);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.v("Fetch fail",error.toString());
+                checkAndFetchCache();
             }
         });
 
@@ -97,7 +102,19 @@ public class MainActivity extends AppCompatActivity {
         mRequestQueue.add(mJsonArrayRequest);
     }
 
-    private void setRepositoryData(List<Repository> repositoryList){
+    private void setRepositoryData(JSONArray response){
+        List<Repository> repositoryList = new ArrayList<>();
+        for (int i = 0; i < response.length(); i++) {
+            try {
+                JSONObject jsonObject = response.getJSONObject(i);
+                Repository repository = new Repository(jsonObject.getString("author"),jsonObject.getString("name"),jsonObject.getString("avatar"),
+                        jsonObject.getString("url"),jsonObject.getString("description"),jsonObject.getString("language"),jsonObject.getString("languageColor"),
+                        jsonObject.getInt("stars"),jsonObject.getInt("forks"),jsonObject.getInt("currentPeriodStars"));
+                repositoryList.add(repository);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         for(Repository repository: repositoryList){
             makeRepositoryLayout(repoLayout, repository);
         }
@@ -146,5 +163,56 @@ public class MainActivity extends AppCompatActivity {
         });
 
         view.addView(repoView);
+    }
+
+    private void checkAndSaveCache(JSONArray response)  {
+        try{
+            if(!PreferenceManager.getDefaultSharedPreferences(this).contains("JSONCache") || !PreferenceManager.getDefaultSharedPreferences(this).contains("TimestampCache")){
+                saveCurrentToCache(response);
+            }else{
+                if(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache","") == null||
+                        PreferenceManager.getDefaultSharedPreferences(this).getString("TimestampCache","") == null){
+                    saveCurrentToCache(response);
+                }else{
+                    JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache",""));
+                    long cachedTimestamp = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(this).getString("TimestampCache",""));
+                    Long currentTimestamp = System.currentTimeMillis()/1000;
+                    if(currentTimestamp - cachedTimestamp > 7200 && !jsonCache.equals(response)){
+                        saveCurrentToCache(response);
+                    }
+                }
+            }
+        }catch(JSONException e){
+            Log.e("Cache fetch error",e.toString());
+        }
+    }
+
+    private void saveCurrentToCache(JSONArray currentResponse){
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putString("JSONCache",currentResponse.toString()).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putString("TimestampCache",String.valueOf(System.currentTimeMillis()/1000)).apply();
+    }
+
+    private void checkAndFetchCache(){
+        if(!PreferenceManager.getDefaultSharedPreferences(this).contains("JSONCache") || !PreferenceManager.getDefaultSharedPreferences(this).contains("TimestampCache")){
+            noInternetLayout.setVisibility(View.VISIBLE);
+            shimmerFrameLayout.setVisibility(View.GONE);
+            shimmerFrameLayout.stopShimmerAnimation();
+        }else{
+            if(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache","") == null||
+                    PreferenceManager.getDefaultSharedPreferences(this).getString("TimestampCache","") == null){
+                noInternetLayout.setVisibility(View.VISIBLE);
+                shimmerFrameLayout.setVisibility(View.GONE);
+                shimmerFrameLayout.stopShimmerAnimation();
+            }else{
+                try{
+                    JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache",""));
+                    setRepositoryData(jsonCache);
+                }catch(JSONException e){
+                    Log.e("Cache fetch error",e.toString());
+                }
+            }
+        }
     }
 }
