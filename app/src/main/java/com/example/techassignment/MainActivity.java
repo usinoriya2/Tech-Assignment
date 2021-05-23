@@ -4,7 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -23,6 +26,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.example.techassignment.Models.Repository;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
@@ -30,6 +34,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -147,9 +155,10 @@ public class MainActivity extends AppCompatActivity {
         stars.setText(String.valueOf(repository.getStars()));
         forks.setText(String.valueOf(repository.getForks()));
 
-        Uri imgUri=Uri.parse(repository.getAvatar());
-        avatar.setImageURI(null);
-        avatar.setImageURI(imgUri);
+//        SetImageParams setImageParams = new SetImageParams(repository.getUrl(), avatar);
+//        SetImageAsyncTask setImageAsyncTask = new SetImageAsyncTask();
+//        setImageAsyncTask.execute(setImageParams);
+        Glide.with(this).load(repository.getAvatar()).into(avatar);
 
         repoView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
         view.addView(repoView);
     }
+
 
     private void checkAndSaveCache(JSONArray response)  {
         try{
@@ -215,4 +225,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 }
