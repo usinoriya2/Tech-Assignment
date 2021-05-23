@@ -51,16 +51,22 @@
             <include layout="@layout/shimmer_placeholder_layout"/>
         </LinearLayout>
     </com.facebook.shimmer.ShimmerFrameLayout>
-    <ScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/pull_to_refresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/my_toolbar">
-        <LinearLayout
-            android:id="@+id/repo_layout"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
-    </ScrollView>
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/repo_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
     <include
         android:id="@+id/no_internet_layout"
         android:layout_height="wrap_content"

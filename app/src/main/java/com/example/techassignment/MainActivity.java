@@ -2,6 +2,7 @@ package com.example.techassignment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import java.util.logging.Logger;
 
 public class MainActivity extends AppCompatActivity {
     private ShimmerFrameLayout shimmerFrameLayout;
+    private SwipeRefreshLayout pullToRefresh;
     private LinearLayout repoLayout;
     private Handler handler;
     private Runnable r;
@@ -50,12 +52,22 @@ public class MainActivity extends AppCompatActivity {
     private void bindViews(){
         shimmerFrameLayout = findViewById(R.id.shimmerFrameLayout);
         repoLayout = findViewById(R.id.repo_layout);
-        shimmerFrameLayout.setVisibility(View.VISIBLE);
-        shimmerFrameLayout.startShimmerAnimation();
+        pullToRefresh = findViewById(R.id.pull_to_refresh);
+
+        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getRepositoryData();
+                pullToRefresh.setRefreshing(false);
+            }
+        });
     }
 
 
     private void getRepositoryData(){
+        shimmerFrameLayout.setVisibility(View.VISIBLE);
+        shimmerFrameLayout.startShimmerAnimation();
+        repoLayout.removeAllViews();
         mJsonArrayRequest = new JsonArrayRequest(
                 "https://private-anon-cf6ffd2614-githubtrendingapi.apiary-mock.com/repositories", new Response.Listener<JSONArray>() {
             @Override
@@ -87,13 +99,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void setRepositoryData(List<Repository> repositoryList){
         for(Repository repository: repositoryList){
-            makeRepositoryLayout(2000, repoLayout, repository);
+            makeRepositoryLayout(repoLayout, repository);
         }
         shimmerFrameLayout.setVisibility(View.GONE);
         shimmerFrameLayout.stopShimmerAnimation();
     }
 
-    private void makeRepositoryLayout(int screenHeight,  LinearLayout view, Repository repository){
+    private void makeRepositoryLayout( LinearLayout view, Repository repository){
         LayoutInflater inflater = (LayoutInflater) view.getContext().getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
         View repoView = inflater.inflate(R.layout.repository, null);
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
