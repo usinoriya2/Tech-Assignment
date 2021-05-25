@@ -30,14 +30,14 @@
                 android:id="@+id/author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="author"/>
+                android:text="@string/author"/>
             <TextView
                 android:id="@+id/repo_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/_16sdp"
                 android:textStyle="bold"
-                android:text="repository name"/>
+                android:text="@string/repo_name"/>
             <LinearLayout
                 android:id="@+id/description_layout"
                 android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
                     android:id="@+id/description"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="description"/>
+                    android:text="@string/description"/>
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -66,7 +66,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_5sdp"
-                        android:text="C++"/>
+                        android:text="@string/language"/>
                     <ImageView
                         android:layout_width="@dimen/_10sdp"
                         android:layout_height="@dimen/_10sdp"
@@ -78,7 +78,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_5sdp"
-                        android:text="14,236"/>
+                        android:text="@string/stars"/>
                     <ImageView
                         android:layout_width="@dimen/_10sdp"
                         android:layout_height="@dimen/_10sdp"
@@ -90,7 +90,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_5sdp"
-                        android:text="4,376"/>
+                        android:text="@string/forks"/>
                 </LinearLayout>
             </LinearLayout>
 

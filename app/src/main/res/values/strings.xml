@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Tech Assignment</string>
+    <string name="trending">Trending</string>
+    <string name="went_wrong">Something went wrong...</string>
+    <string name="alien_blocking">An alien is probably blocking your signal</string>
+    <string name="retry">RETRY</string>
+    <string name="author">author</string>
+    <string name="repo_name">repository name</string>
+    <string name="description">description</string>
+    <string name="language">C++</string>
+    <string name="stars">14,236</string>
+    <string name="forks">4,376</string>
+    <string name="not_available">Not Available</string>
 </resources>

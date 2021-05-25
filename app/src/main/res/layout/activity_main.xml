@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Trending"
+            android:text="@string/trending"
             android:layout_gravity="center"
             android:textSize="@dimen/_22sdp"
             android:textStyle="bold"

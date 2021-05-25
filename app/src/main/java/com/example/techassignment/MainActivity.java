@@ -165,7 +165,12 @@ public class MainActivity extends AppCompatActivity {
         name.setText(repository.getName());
         description.setText(repository.getDescription());
 //        languageColor.setCardBackgroundColor(Color.parseColor(repository.getLanguageColor()));
-        language.setText(repository.getLanguage());
+        if(repository.getLanguage() != null && !repository.getLanguage().equals("null")){
+            language.setText(repository.getLanguage());
+        }else{
+            language.setText(R.string.not_available);
+        }
+
         stars.setText(String.valueOf(repository.getStars()));
         forks.setText(String.valueOf(repository.getForks()));
 

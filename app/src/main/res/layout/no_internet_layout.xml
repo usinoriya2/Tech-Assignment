@@ -19,14 +19,14 @@
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/no_internet_image"
-        android:text="Something went wrong..."/>
+        android:text="@string/went_wrong"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/something_went_wrong"
         android:textSize="@dimen/_12sdp"
-        android:text="An alien is probably blocking your signal"/>
+        android:text="@string/alien_blocking"/>
     <Button
         android:id="@+id/retry_button"
         android:layout_width="@dimen/_300sdp"
@@ -34,7 +34,7 @@
         android:layout_marginBottom="@dimen/_20sdp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:text="RETRY"
+        android:text="@string/retry"
         android:textSize="@dimen/_14sdp"
         android:textColor="@color/button_green"
         android:background="@drawable/custum_button"/>
