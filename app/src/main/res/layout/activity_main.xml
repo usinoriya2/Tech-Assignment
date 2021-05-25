@@ -31,7 +31,7 @@
     </androidx.appcompat.widget.Toolbar>
 
     <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmerFrameLayout"
+        android:id="@+id/shimmer_frame_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"

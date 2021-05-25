@@ -58,6 +58,7 @@
                         android:id="@+id/language_color"
                         android:layout_width="@dimen/_10sdp"
                         android:layout_height="@dimen/_10sdp"
+                        android:layout_marginTop="@dimen/_3sdp"
                         app:cardBackgroundColor="@color/red"
                         app:cardCornerRadius="@dimen/_5sdp"/>
                     <TextView
@@ -69,6 +70,7 @@
                     <ImageView
                         android:layout_width="@dimen/_10sdp"
                         android:layout_height="@dimen/_10sdp"
+                        android:layout_marginTop="@dimen/_3sdp"
                         android:layout_marginStart="@dimen/_20sdp"
                         android:src="@drawable/star"/>
                     <TextView
@@ -80,6 +82,7 @@
                     <ImageView
                         android:layout_width="@dimen/_10sdp"
                         android:layout_height="@dimen/_10sdp"
+                        android:layout_marginTop="@dimen/_3sdp"
                         android:layout_marginStart="@dimen/_20sdp"
                         android:src="@drawable/fork"/>
                     <TextView

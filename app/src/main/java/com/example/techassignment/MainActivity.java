@@ -6,6 +6,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,12 +22,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.techassignment.Models.Repository;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
@@ -48,10 +52,11 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout pullToRefresh;
     private RelativeLayout noInternetLayout;
     private LinearLayout repoLayout;
+    public static int jsonArraySize = 0;
     private Button retryButton;
     private Handler handler;
     private Runnable r;
-    private JsonArrayRequest mJsonArrayRequest;
+    private JsonObjectRequest mJsonObjectRequest;
     private RequestQueue mRequestQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindViews(){
-        shimmerFrameLayout = findViewById(R.id.shimmerFrameLayout);
+        shimmerFrameLayout = findViewById(R.id.shimmer_frame_layout);
         repoLayout = findViewById(R.id.repo_layout);
         noInternetLayout = findViewById(R.id.no_internet_layout);
         retryButton = findViewById(R.id.retry_button);
@@ -91,12 +96,20 @@ public class MainActivity extends AppCompatActivity {
         shimmerFrameLayout.setVisibility(View.VISIBLE);
         shimmerFrameLayout.startShimmerAnimation();
         repoLayout.removeAllViews();
-        mJsonArrayRequest = new JsonArrayRequest(
-                "https://private-anon-cf6ffd2614-githubtrendingapi.apiary-mock.com/repositories", new Response.Listener<JSONArray>() {
+//        new JsonArrayRequest()
+        mJsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET, "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily",null, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONArray response) {
-                setRepositoryData(response);
-                checkAndSaveCache(response);
+            public void onResponse(JSONObject response) {
+                try{
+                    JSONArray jsonArray = (JSONArray) response.get("items");
+                    jsonArraySize = response.length();
+                    setRepositoryData(jsonArray);
+                    checkAndSaveCache(jsonArray);
+                }catch(Exception e){
+
+                }
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -107,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mRequestQueue = Volley.newRequestQueue(MainActivity.this);
-        mRequestQueue.add(mJsonArrayRequest);
+        mRequestQueue.add(mJsonObjectRequest);
     }
 
     private void setRepositoryData(JSONArray response){
@@ -115,9 +128,9 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < response.length(); i++) {
             try {
                 JSONObject jsonObject = response.getJSONObject(i);
-                Repository repository = new Repository(jsonObject.getString("author"),jsonObject.getString("name"),jsonObject.getString("avatar"),
-                        jsonObject.getString("url"),jsonObject.getString("description"),jsonObject.getString("language"),jsonObject.getString("languageColor"),
-                        jsonObject.getInt("stars"),jsonObject.getInt("forks"),jsonObject.getInt("currentPeriodStars"));
+                Repository repository = new Repository(jsonObject.getString("name"),jsonObject.getString("full_name"),jsonObject.getJSONObject("owner").getString("avatar_url"),
+                        jsonObject.getJSONObject("owner").getString("url"),jsonObject.getString("description"),jsonObject.getString("language"),"",
+                        jsonObject.getInt("stargazers_count"),jsonObject.getInt("forks"),0);
                 repositoryList.add(repository);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -150,15 +163,13 @@ public class MainActivity extends AppCompatActivity {
         author.setText(repository.getAuthor());
         name.setText(repository.getName());
         description.setText(repository.getDescription());
-//        languageColor.setCardBackgroundColor(repository.getLanguageColor());
+//        languageColor.setCardBackgroundColor(Color.parseColor(repository.getLanguageColor()));
         language.setText(repository.getLanguage());
         stars.setText(String.valueOf(repository.getStars()));
         forks.setText(String.valueOf(repository.getForks()));
 
-//        SetImageParams setImageParams = new SetImageParams(repository.getUrl(), avatar);
-//        SetImageAsyncTask setImageAsyncTask = new SetImageAsyncTask();
-//        setImageAsyncTask.execute(setImageParams);
-        Glide.with(this).load(repository.getAvatar()).into(avatar);
+        RequestOptions requestOptions = new RequestOptions().override(300, 300);
+        Glide.with(getApplicationContext()).asBitmap().apply(requestOptions).load(repository.getAvatar()).into(avatar);
 
         repoView.setOnClickListener(new View.OnClickListener() {
             @Override
