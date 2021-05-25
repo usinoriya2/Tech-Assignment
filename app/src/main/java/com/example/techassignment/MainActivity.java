@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout noInternetLayout;
     private LinearLayout repoLayout;
     public static int jsonArraySize = 0;
+    private static String REPO_URL = "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily";
     private Button retryButton;
     private Handler handler;
     private Runnable r;
@@ -98,12 +99,12 @@ public class MainActivity extends AppCompatActivity {
         repoLayout.removeAllViews();
 //        new JsonArrayRequest()
         mJsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily",null, new Response.Listener<JSONObject>() {
+                Request.Method.GET, REPO_URL,null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try{
                     JSONArray jsonArray = (JSONArray) response.get("items");
-                    jsonArraySize = response.length();
+                    jsonArraySize = jsonArray.length();
                     setRepositoryData(jsonArray);
                     checkAndSaveCache(jsonArray);
                 }catch(Exception e){

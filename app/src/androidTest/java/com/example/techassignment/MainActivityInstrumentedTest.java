@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -36,16 +37,6 @@ public class MainActivityInstrumentedTest {
     public ActivityScenarioRule<MainActivity> activityRule
             = new ActivityScenarioRule<>(MainActivity.class);
 
-    @Before
-    public void init() {
-
-    }
-
-    @Test
-    public void offlineTest() throws InterruptedException {
-
-        Thread.sleep(2000);
-    }
 
     @Test
     public void mainActivityInstrumentedTest() throws InterruptedException {
@@ -59,23 +50,26 @@ public class MainActivityInstrumentedTest {
         onView(withId(R.id.shimmer_frame_layout))
                 .check(matches(not(isDisplayed())));
 
-//        onView(allOf(withId(R.id.author)))
-//                .check(matches(isDisplayed()));
-        int responseSize = MainActivity.jsonArraySize;
-        for(int i=0;i <responseSize;i++){
+        repoCardTest();
+
+        Thread.sleep(2000);
+        //pull to refresh test
+        onView(withId(R.id.repo_scroll_view)).perform(ViewActions.swipeDown());
+
+        Thread.sleep(1000);
+
+        repoCardTest();
+
+    }
+
+    private void repoCardTest(){
+        for(int i=0;i <6;i++){
             onView(nthChildOf(withId(R.id.repo_layout), i)).check(matches(isDisplayed())).perform(click());
             onView(nthChildOf(withId(R.id.repo_layout), i)).check(matches(isDisplayed())).perform(click());
         }
-
-
-//        onView(
-//                withPositionInParent(R.id.repo_layout, 0)
-//        ).check(
-//                matches(withId(R.id.description_layout))
-//        ).perform(click());
     }
 
-    public static Matcher<View> nthChildOf(final Matcher<View> parentMatcher, final int childPosition) {
+    private static Matcher<View> nthChildOf(final Matcher<View> parentMatcher, final int childPosition) {
         return new TypeSafeMatcher<View>() {
             @Override
             public void describeTo(Description description) {
