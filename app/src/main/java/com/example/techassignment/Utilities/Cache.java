@@ -5,24 +5,28 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 
+import com.example.techassignment.Models.Repository;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.List;
+
 public class Cache {
-    public static void checkAndSaveCache(JSONArray response, Context context, String cacheName, String timestamp)  {
+    public static void checkAndSaveCache(List<Repository> repositoryList, Context context, String cacheName, String timestamp)  {
         try{
             if(!PreferenceManager.getDefaultSharedPreferences(context).contains(cacheName) || !PreferenceManager.getDefaultSharedPreferences(context).contains(timestamp)){
-                saveCurrentToCache(response, context, cacheName, timestamp);
+                saveCurrentToCache(repositoryList, context, cacheName, timestamp);
             }else{
                 if(PreferenceManager.getDefaultSharedPreferences(context).getString(cacheName,"") == null||
                         PreferenceManager.getDefaultSharedPreferences(context).getString(timestamp,"") == null){
-                    saveCurrentToCache(response, context, cacheName, timestamp);
+                    saveCurrentToCache(repositoryList, context, cacheName, timestamp);
                 }else{
                     JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(context).getString(cacheName,""));
                     long cachedTimestamp = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(context).getString(timestamp,""));
                     Long currentTimestamp = System.currentTimeMillis()/1000;
-                    if(currentTimestamp - cachedTimestamp > 7200 && !jsonCache.equals(response)){
-                        saveCurrentToCache(response, context, cacheName, timestamp);
+                    if(currentTimestamp - cachedTimestamp > 7200 && !jsonCache.equals(repositoryList)){
+                        saveCurrentToCache(repositoryList, context, cacheName, timestamp);
                     }
                 }
             }
@@ -31,9 +35,9 @@ public class Cache {
         }
     }
 
-    public static void saveCurrentToCache(JSONArray currentResponse, Context context, String cacheName, String timestamp){
+    public static void saveCurrentToCache(List<Repository> repositoryList, Context context, String cacheName, String timestamp){
         PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString(cacheName,currentResponse.toString()).apply();
+                .putString(cacheName,repositoryList.toString()).apply();
         PreferenceManager.getDefaultSharedPreferences(context).edit()
                 .putString(timestamp,String.valueOf(System.currentTimeMillis()/1000)).apply();
     }

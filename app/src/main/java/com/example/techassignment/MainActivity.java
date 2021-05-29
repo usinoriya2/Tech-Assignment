@@ -2,6 +2,8 @@ package com.example.techassignment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.techassignment.Adapters.RepositoryAdapter;
 import com.example.techassignment.Models.Repository;
 import com.example.techassignment.Utilities.ApiClient;
 import com.example.techassignment.Utilities.ApiInterface;
@@ -41,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private ShimmerFrameLayout shimmerFrameLayout;
     private SwipeRefreshLayout pullToRefresh;
     private RelativeLayout noInternetLayout;
-    private LinearLayout repoLayout;
-    public static int jsonArraySize = 0;
+    private RecyclerView recyclerView;
+    private RepositoryAdapter repositoryAdapter;
     private static final String cacheName = "JSONCache";
     private static final String timeStampCache = "TimestampCache";
     private static String REPO_URL = "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily";
@@ -56,12 +59,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bindViews();
+        init();
         getRepositoryData();
     }
 
     private void bindViews(){
         shimmerFrameLayout = findViewById(R.id.shimmer_frame_layout);
-        repoLayout = findViewById(R.id.repo_layout);
+        recyclerView = findViewById(R.id.recycler_view);
         noInternetLayout = findViewById(R.id.no_internet_layout);
         retryButton = findViewById(R.id.retry_button);
         pullToRefresh = findViewById(R.id.pull_to_refresh);
@@ -69,21 +73,31 @@ public class MainActivity extends AppCompatActivity {
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                getRepositoryData();
+                getRepositoryData();
                 pullToRefresh.setRefreshing(false);
             }
         });
 
-//        retryButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                getRepositoryData();
-//            }
-//        });
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getRepositoryData();
+            }
+        });
 
     }
 
+    private void init(){
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(linearLayoutManager);
+    }
+
     private void getRepositoryData(){
+        shimmerFrameLayout.setVisibility(View.VISIBLE);
+        shimmerFrameLayout.startShimmerAnimation();
+        if(repositoryAdapter!=null){
+            repositoryAdapter.clear();
+        }
         ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
 
         Call<List<Repository>> call = apiInterface.getRepositoryList();
@@ -93,15 +107,13 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<List<Repository>> call, retrofit2.Response<List<Repository>> response) {
                 Log.v("response",response.body().toString());
                 List<Repository> repositoryList = response.body();
-                for(Repository repository: repositoryList){
-                    makeRepositoryLayout(repoLayout,repository);
-                }
+                setRecyclerView(repositoryList);
             }
 
             @Override
             public void onFailure(Call<List<Repository>> call, Throwable t) {
                 if(t instanceof NetworkError){
-
+                    setRecyclerView(null);
                 }else{
 
                 }
@@ -225,10 +237,23 @@ public class MainActivity extends AppCompatActivity {
                 try{
                     JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache",""));
 //                    setRepositoryData(jsonCache);
+
                 }catch(JSONException e){
                     Log.e("Cache fetch error",e.toString());
                 }
             }
+        }
+    }
+
+    private void setRecyclerView(List<Repository> repositoryList){
+        if(repositoryList == null){
+//            checkAndFetchCache();
+        }else{
+            repositoryAdapter = new RepositoryAdapter(repositoryList, getApplicationContext());
+//        repositoryAdapter.setItemClickListener(itemCLickListener);
+            recyclerView.setAdapter(repositoryAdapter);
+            shimmerFrameLayout.setVisibility(View.GONE);
+            shimmerFrameLayout.stopShimmerAnimation();
         }
     }
 

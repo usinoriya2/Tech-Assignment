@@ -9,6 +9,6 @@ import retrofit2.http.GET;
 
 public interface ApiInterface {
 
-    @GET("/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily")
+    @GET("/repositories?q=android&per_page=50&sort=stars&page=1&order=desc")
     Call<List<Repository>> getRepositoryList();
 }
