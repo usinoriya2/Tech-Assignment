@@ -4,11 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -22,30 +17,25 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.Request;
+import com.android.volley.NetworkError;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.techassignment.Models.Repository;
+import com.example.techassignment.Utilities.ApiClient;
+import com.example.techassignment.Utilities.ApiInterface;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.Logger;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity {
     private ShimmerFrameLayout shimmerFrameLayout;
@@ -53,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout noInternetLayout;
     private LinearLayout repoLayout;
     public static int jsonArraySize = 0;
+    private static final String cacheName = "JSONCache";
+    private static final String timeStampCache = "TimestampCache";
     private static String REPO_URL = "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily";
     private Button retryButton;
     private Handler handler;
@@ -77,72 +69,99 @@ public class MainActivity extends AppCompatActivity {
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getRepositoryData();
+//                getRepositoryData();
                 pullToRefresh.setRefreshing(false);
             }
         });
 
-        retryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getRepositoryData();
-            }
-        });
+//        retryButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                getRepositoryData();
+//            }
+//        });
 
     }
-
 
     private void getRepositoryData(){
-        noInternetLayout.setVisibility(View.GONE);
-        shimmerFrameLayout.setVisibility(View.VISIBLE);
-        shimmerFrameLayout.startShimmerAnimation();
-        repoLayout.removeAllViews();
-//        new JsonArrayRequest()
-        mJsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, REPO_URL,null, new Response.Listener<JSONObject>() {
+        ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
+
+        Call<List<Repository>> call = apiInterface.getRepositoryList();
+        call.enqueue(new Callback<List<Repository>>() {
+
             @Override
-            public void onResponse(JSONObject response) {
-                try{
-                    JSONArray jsonArray = (JSONArray) response.get("items");
-                    jsonArraySize = jsonArray.length();
-                    setRepositoryData(jsonArray);
-                    checkAndSaveCache(jsonArray);
-                }catch(Exception e){
+            public void onResponse(Call<List<Repository>> call, retrofit2.Response<List<Repository>> response) {
+                Log.v("response",response.body().toString());
+                List<Repository> repositoryList = response.body();
+                for(Repository repository: repositoryList){
+                    makeRepositoryLayout(repoLayout,repository);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Repository>> call, Throwable t) {
+                if(t instanceof NetworkError){
+
+                }else{
 
                 }
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.v("Fetch fail",error.toString());
-                checkAndFetchCache();
+                Log.v("error",t.toString());
             }
         });
 
-        mRequestQueue = Volley.newRequestQueue(MainActivity.this);
-        mRequestQueue.add(mJsonObjectRequest);
     }
 
-    private void setRepositoryData(JSONArray response){
-        List<Repository> repositoryList = new ArrayList<>();
-        for (int i = 0; i < response.length(); i++) {
-            try {
-                JSONObject jsonObject = response.getJSONObject(i);
-                Repository repository = new Repository(jsonObject.getString("name"),jsonObject.getString("full_name"),jsonObject.getJSONObject("owner").getString("avatar_url"),
-                        jsonObject.getJSONObject("owner").getString("url"),jsonObject.getString("description"),jsonObject.getString("language"),"",
-                        jsonObject.getInt("stargazers_count"),jsonObject.getInt("forks"),0);
-                repositoryList.add(repository);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        for(Repository repository: repositoryList){
-            makeRepositoryLayout(repoLayout, repository);
-        }
-        shimmerFrameLayout.setVisibility(View.GONE);
-        shimmerFrameLayout.stopShimmerAnimation();
-    }
+//    private void getRepositoryData(){
+//        noInternetLayout.setVisibility(View.GONE);
+//        shimmerFrameLayout.setVisibility(View.VISIBLE);
+//        shimmerFrameLayout.startShimmerAnimation();
+//        repoLayout.removeAllViews();
+////        new JsonArrayRequest()
+//        mJsonObjectRequest = new JsonObjectRequest(
+//                Request.Method.GET, REPO_URL,null, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                try{
+//                    JSONArray jsonArray = (JSONArray) response.get("items");
+//                    jsonArraySize = jsonArray.length();
+//                    setRepositoryData(jsonArray);
+//                    Cache.checkAndSaveCache(jsonArray, getApplicationContext(),cacheName,timeStampCache);
+//                }catch(Exception e){
+//
+//                }
+//
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.v("Fetch fail",error.toString());
+//                checkAndFetchCache();
+//            }
+//        });
+//
+//        mRequestQueue = Volley.newRequestQueue(MainActivity.this);
+//        mRequestQueue.add(mJsonObjectRequest);
+//    }
+
+//    private void setRepositoryData(JSONArray response){
+//        List<Repository> repositoryList = new ArrayList<>();
+//        for (int i = 0; i < response.length(); i++) {
+//            try {
+//                JSONObject jsonObject = response.getJSONObject(i);
+//                Repository repository = new Repository(jsonObject.getString("name"),jsonObject.getString("full_name"),jsonObject.getJSONObject("owner").getString("avatar_url"),
+//                        owner, jsonObject.getString("description"),jsonObject.getString("language"),"",
+//                        jsonObject.getInt("stargazers_count"),jsonObject.getInt("forks"),0);
+//                repositoryList.add(repository);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        for(Repository repository: repositoryList){
+//            makeRepositoryLayout(repoLayout, repository);
+//        }
+//        shimmerFrameLayout.setVisibility(View.GONE);
+//        shimmerFrameLayout.stopShimmerAnimation();
+//    }
 
     private void makeRepositoryLayout( LinearLayout view, Repository repository){
         LayoutInflater inflater = (LayoutInflater) view.getContext().getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
@@ -152,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         lp.bottomMargin = 10;
         repoView.setLayoutParams(lp);
         TextView author = repoView.findViewById(R.id.author);
-        TextView name = repoView.findViewById(R.id.repo_name);
+        TextView repoName = repoView.findViewById(R.id.repo_name);
         TextView description = repoView.findViewById(R.id.description);
         ImageView avatar = repoView.findViewById(R.id.avatar);
         final LinearLayout descriptionLayout = repoView.findViewById(R.id.description_layout);
@@ -161,21 +180,21 @@ public class MainActivity extends AppCompatActivity {
         TextView stars = repoView.findViewById(R.id.stars);
         TextView forks = repoView.findViewById(R.id.forks);
 
-        author.setText(repository.getAuthor());
-        name.setText(repository.getName());
+        author.setText(repository.getName());
+        repoName.setText(repository.getFullName());
         description.setText(repository.getDescription());
 //        languageColor.setCardBackgroundColor(Color.parseColor(repository.getLanguageColor()));
-        if(repository.getLanguage() != null && !repository.getLanguage().equals("null")){
-            language.setText(repository.getLanguage());
-        }else{
-            language.setText(R.string.not_available);
-        }
+//        if(repository.getLanguage() != null && !repository.getLanguage().equals("null")){
+//            language.setText(repository.getLanguage());
+//        }else{
+//            language.setText(R.string.not_available);
+//        }
 
-        stars.setText(String.valueOf(repository.getStars()));
-        forks.setText(String.valueOf(repository.getForks()));
+//        stars.setText(String.valueOf(repository.getS()));
+//        forks.setText(String.valueOf(repository.getForks()));
 
         RequestOptions requestOptions = new RequestOptions().override(300, 300);
-        Glide.with(getApplicationContext()).asBitmap().apply(requestOptions).load(repository.getAvatar()).into(avatar);
+//        Glide.with(getApplicationContext()).asBitmap().apply(requestOptions).load(repository.getOwner().getAvatarUrl()).into(avatar);
 
         repoView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,36 +208,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         view.addView(repoView);
-    }
-
-
-    private void checkAndSaveCache(JSONArray response)  {
-        try{
-            if(!PreferenceManager.getDefaultSharedPreferences(this).contains("JSONCache") || !PreferenceManager.getDefaultSharedPreferences(this).contains("TimestampCache")){
-                saveCurrentToCache(response);
-            }else{
-                if(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache","") == null||
-                        PreferenceManager.getDefaultSharedPreferences(this).getString("TimestampCache","") == null){
-                    saveCurrentToCache(response);
-                }else{
-                    JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache",""));
-                    long cachedTimestamp = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(this).getString("TimestampCache",""));
-                    Long currentTimestamp = System.currentTimeMillis()/1000;
-                    if(currentTimestamp - cachedTimestamp > 7200 && !jsonCache.equals(response)){
-                        saveCurrentToCache(response);
-                    }
-                }
-            }
-        }catch(JSONException e){
-            Log.e("Cache fetch error",e.toString());
-        }
-    }
-
-    private void saveCurrentToCache(JSONArray currentResponse){
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putString("JSONCache",currentResponse.toString()).apply();
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putString("TimestampCache",String.valueOf(System.currentTimeMillis()/1000)).apply();
     }
 
     private void checkAndFetchCache(){
@@ -235,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
             }else{
                 try{
                     JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache",""));
-                    setRepositoryData(jsonCache);
+//                    setRepositoryData(jsonCache);
                 }catch(JSONException e){
                     Log.e("Cache fetch error",e.toString());
                 }
