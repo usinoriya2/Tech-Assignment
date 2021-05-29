@@ -28,7 +28,10 @@ import com.example.techassignment.Adapters.RepositoryAdapter;
 import com.example.techassignment.Models.Repository;
 import com.example.techassignment.Utilities.ApiClient;
 import com.example.techassignment.Utilities.ApiInterface;
+import com.example.techassignment.Utilities.Cache;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,14 +49,10 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout noInternetLayout;
     private RecyclerView recyclerView;
     private RepositoryAdapter repositoryAdapter;
-    private static final String cacheName = "JSONCache";
+    private static final String cacheName = "RepositoryDataCache";
     private static final String timeStampCache = "TimestampCache";
     private static String REPO_URL = "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily";
     private Button retryButton;
-    private Handler handler;
-    private Runnable r;
-    private JsonObjectRequest mJsonObjectRequest;
-    private RequestQueue mRequestQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,153 +107,52 @@ public class MainActivity extends AppCompatActivity {
                 Log.v("response",response.body().toString());
                 List<Repository> repositoryList = response.body();
                 setRecyclerView(repositoryList);
+                Cache.checkAndSaveCache(repositoryList, getApplicationContext(), cacheName, timeStampCache);
             }
 
             @Override
             public void onFailure(Call<List<Repository>> call, Throwable t) {
-                if(t instanceof NetworkError){
-                    setRecyclerView(null);
-                }else{
-
-                }
-                Log.v("error",t.toString());
-            }
-        });
-
-    }
-
-//    private void getRepositoryData(){
-//        noInternetLayout.setVisibility(View.GONE);
-//        shimmerFrameLayout.setVisibility(View.VISIBLE);
-//        shimmerFrameLayout.startShimmerAnimation();
-//        repoLayout.removeAllViews();
-////        new JsonArrayRequest()
-//        mJsonObjectRequest = new JsonObjectRequest(
-//                Request.Method.GET, REPO_URL,null, new Response.Listener<JSONObject>() {
-//            @Override
-//            public void onResponse(JSONObject response) {
-//                try{
-//                    JSONArray jsonArray = (JSONArray) response.get("items");
-//                    jsonArraySize = jsonArray.length();
-//                    setRepositoryData(jsonArray);
-//                    Cache.checkAndSaveCache(jsonArray, getApplicationContext(),cacheName,timeStampCache);
-//                }catch(Exception e){
-//
+//                if(t instanceof NetworkError){
+//                    setRecyclerView(null);
+//                }else{
+//                    noInternetLayout.setVisibility(View.VISIBLE);
+//                    shimmerFrameLayout.setVisibility(View.GONE);
+//                    shimmerFrameLayout.stopShimmerAnimation();
 //                }
-//
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.v("Fetch fail",error.toString());
-//                checkAndFetchCache();
-//            }
-//        });
-//
-//        mRequestQueue = Volley.newRequestQueue(MainActivity.this);
-//        mRequestQueue.add(mJsonObjectRequest);
-//    }
-
-//    private void setRepositoryData(JSONArray response){
-//        List<Repository> repositoryList = new ArrayList<>();
-//        for (int i = 0; i < response.length(); i++) {
-//            try {
-//                JSONObject jsonObject = response.getJSONObject(i);
-//                Repository repository = new Repository(jsonObject.getString("name"),jsonObject.getString("full_name"),jsonObject.getJSONObject("owner").getString("avatar_url"),
-//                        owner, jsonObject.getString("description"),jsonObject.getString("language"),"",
-//                        jsonObject.getInt("stargazers_count"),jsonObject.getInt("forks"),0);
-//                repositoryList.add(repository);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        for(Repository repository: repositoryList){
-//            makeRepositoryLayout(repoLayout, repository);
-//        }
-//        shimmerFrameLayout.setVisibility(View.GONE);
-//        shimmerFrameLayout.stopShimmerAnimation();
-//    }
-
-    private void makeRepositoryLayout( LinearLayout view, Repository repository){
-        LayoutInflater inflater = (LayoutInflater) view.getContext().getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
-        View repoView = inflater.inflate(R.layout.repository, null);
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = 10;
-        repoView.setLayoutParams(lp);
-        TextView author = repoView.findViewById(R.id.author);
-        TextView repoName = repoView.findViewById(R.id.repo_name);
-        TextView description = repoView.findViewById(R.id.description);
-        ImageView avatar = repoView.findViewById(R.id.avatar);
-        final LinearLayout descriptionLayout = repoView.findViewById(R.id.description_layout);
-        CardView languageColor = repoView.findViewById(R.id.language_color);
-        TextView language = repoView.findViewById(R.id.language);
-        TextView stars = repoView.findViewById(R.id.stars);
-        TextView forks = repoView.findViewById(R.id.forks);
-
-        author.setText(repository.getName());
-        repoName.setText(repository.getFullName());
-        description.setText(repository.getDescription());
-//        languageColor.setCardBackgroundColor(Color.parseColor(repository.getLanguageColor()));
-//        if(repository.getLanguage() != null && !repository.getLanguage().equals("null")){
-//            language.setText(repository.getLanguage());
-//        }else{
-//            language.setText(R.string.not_available);
-//        }
-
-//        stars.setText(String.valueOf(repository.getS()));
-//        forks.setText(String.valueOf(repository.getForks()));
-
-        RequestOptions requestOptions = new RequestOptions().override(300, 300);
-//        Glide.with(getApplicationContext()).asBitmap().apply(requestOptions).load(repository.getOwner().getAvatarUrl()).into(avatar);
-
-        repoView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(descriptionLayout.getVisibility() == View.GONE){
-                    descriptionLayout.setVisibility(View.VISIBLE);
-                }else{
-                    descriptionLayout.setVisibility(View.GONE);
-                }
+                Log.v("error",t.toString());
+                setRecyclerView(null);
             }
         });
 
-        view.addView(repoView);
-    }
-
-    private void checkAndFetchCache(){
-        if(!PreferenceManager.getDefaultSharedPreferences(this).contains("JSONCache") || !PreferenceManager.getDefaultSharedPreferences(this).contains("TimestampCache")){
-            noInternetLayout.setVisibility(View.VISIBLE);
-            shimmerFrameLayout.setVisibility(View.GONE);
-            shimmerFrameLayout.stopShimmerAnimation();
-        }else{
-            if(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache","") == null||
-                    PreferenceManager.getDefaultSharedPreferences(this).getString("TimestampCache","") == null){
-                noInternetLayout.setVisibility(View.VISIBLE);
-                shimmerFrameLayout.setVisibility(View.GONE);
-                shimmerFrameLayout.stopShimmerAnimation();
-            }else{
-                try{
-                    JSONArray jsonCache = new JSONArray(PreferenceManager.getDefaultSharedPreferences(this).getString("JSONCache",""));
-//                    setRepositoryData(jsonCache);
-
-                }catch(JSONException e){
-                    Log.e("Cache fetch error",e.toString());
-                }
-            }
-        }
     }
 
     private void setRecyclerView(List<Repository> repositoryList){
         if(repositoryList == null){
-//            checkAndFetchCache();
+            if(Cache.isCachePresent(getApplicationContext(),cacheName,timeStampCache)){
+                try{
+                    String cachedData = Cache.fetchCache(getApplicationContext(), cacheName);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    List<Repository> repositoryListCache = objectMapper.readValue(cachedData, new TypeReference<List<Repository>>(){});
+                    bindRecyclerView(repositoryListCache);
+                }catch(Exception e){
+                    Log.v("object mapper exception",e.toString());
+                }
+            }else{
+                noInternetLayout.setVisibility(View.VISIBLE);
+                shimmerFrameLayout.setVisibility(View.GONE);
+                shimmerFrameLayout.stopShimmerAnimation();
+            }
         }else{
-            repositoryAdapter = new RepositoryAdapter(repositoryList, getApplicationContext());
-//        repositoryAdapter.setItemClickListener(itemCLickListener);
-            recyclerView.setAdapter(repositoryAdapter);
-            shimmerFrameLayout.setVisibility(View.GONE);
-            shimmerFrameLayout.stopShimmerAnimation();
+            bindRecyclerView(repositoryList);
         }
+    }
+
+    private void bindRecyclerView(List<Repository> repositoryList){
+        repositoryAdapter = new RepositoryAdapter(repositoryList, getApplicationContext());
+//        repositoryAdapter.setItemClickListener(itemCLickListener);
+        recyclerView.setAdapter(repositoryAdapter);
+        shimmerFrameLayout.setVisibility(View.GONE);
+        shimmerFrameLayout.stopShimmerAnimation();
     }
 
 }
