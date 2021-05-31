@@ -1,43 +1,28 @@
 package com.example.techassignment;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.android.volley.NetworkError;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.techassignment.Adapters.RepositoryAdapter;
 import com.example.techassignment.Models.Repository;
+import com.example.techassignment.Models.RepositoryData;
 import com.example.techassignment.Utilities.ApiClient;
 import com.example.techassignment.Utilities.ApiInterface;
-import com.example.techassignment.Utilities.Cache;
+import com.example.techassignment.Utilities.CacheUtils;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -49,10 +34,11 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout noInternetLayout;
     private RecyclerView recyclerView;
     private RepositoryAdapter repositoryAdapter;
+    private List<Repository> repositoryList;
     private static final String cacheName = "RepositoryDataCache";
     private static final String timeStampCache = "TimestampCache";
-    private static String REPO_URL = "https://api.github.com/search/repositories?q=android&per_page=50&sort=stars&page=1&order=desc&since=daily";
     private Button retryButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,40 +83,40 @@ public class MainActivity extends AppCompatActivity {
         if(repositoryAdapter!=null){
             repositoryAdapter.clear();
         }
-        ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
+        ApiInterface apiInterface = ApiClient.getClient();
 
-        Call<List<Repository>> call = apiInterface.getRepositoryList();
-        call.enqueue(new Callback<List<Repository>>() {
+        Call<RepositoryData> call = apiInterface.getRepositoryList("android","50","stars","1","desc","daily");
+        call.enqueue(new Callback<RepositoryData>() {
 
             @Override
-            public void onResponse(Call<List<Repository>> call, retrofit2.Response<List<Repository>> response) {
+            public void onResponse(Call<RepositoryData> call, retrofit2.Response<RepositoryData> response) {
                 Log.v("response",response.body().toString());
-                List<Repository> repositoryList = response.body();
-                setRecyclerView(repositoryList);
-                Cache.checkAndSaveCache(repositoryList, getApplicationContext(), cacheName, timeStampCache);
+                repositoryList = response.body().getRepositoryList();
+                setRecyclerView(false);
+                CacheUtils.checkAndSaveCache(repositoryList, getApplicationContext(), cacheName, timeStampCache);
             }
 
             @Override
-            public void onFailure(Call<List<Repository>> call, Throwable t) {
-//                if(t instanceof NetworkError){
-//                    setRecyclerView(null);
-//                }else{
-//                    noInternetLayout.setVisibility(View.VISIBLE);
-//                    shimmerFrameLayout.setVisibility(View.GONE);
-//                    shimmerFrameLayout.stopShimmerAnimation();
-//                }
-                Log.v("error",t.toString());
-                setRecyclerView(null);
+            public void onFailure(Call<RepositoryData> call, Throwable t) {
+                if(t instanceof NetworkError || t instanceof UnknownHostException){
+                    Log.v("Network Error",t.toString());
+                    setRecyclerView(true);
+                }else{
+                    noInternetLayout.setVisibility(View.VISIBLE);
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.stopShimmerAnimation();
+                }
+
             }
         });
 
     }
 
-    private void setRecyclerView(List<Repository> repositoryList){
-        if(repositoryList == null){
-            if(Cache.isCachePresent(getApplicationContext(),cacheName,timeStampCache)){
+    private void setRecyclerView( boolean isNetworkError){
+        if(isNetworkError){
+            if(CacheUtils.isCachePresent(getApplicationContext(),cacheName,timeStampCache)){
                 try{
-                    String cachedData = Cache.fetchCache(getApplicationContext(), cacheName);
+                    String cachedData = CacheUtils.fetchCache(getApplicationContext(), cacheName);
                     ObjectMapper objectMapper = new ObjectMapper();
                     List<Repository> repositoryListCache = objectMapper.readValue(cachedData, new TypeReference<List<Repository>>(){});
                     bindRecyclerView(repositoryListCache);
@@ -149,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void bindRecyclerView(List<Repository> repositoryList){
         repositoryAdapter = new RepositoryAdapter(repositoryList, getApplicationContext());
-//        repositoryAdapter.setItemClickListener(itemCLickListener);
         recyclerView.setAdapter(repositoryAdapter);
         shimmerFrameLayout.setVisibility(View.GONE);
         shimmerFrameLayout.stopShimmerAnimation();

@@ -14,7 +14,7 @@ import org.json.JSONException;
 
 import java.util.List;
 
-public class Cache {
+public class CacheUtils {
     public static void checkAndSaveCache(List<Repository> repositoryList, Context context, String cacheName, String timestamp)  {
         if(!PreferenceManager.getDefaultSharedPreferences(context).contains(cacheName) || !PreferenceManager.getDefaultSharedPreferences(context).contains(timestamp)){
             saveCurrentToCache(repositoryList, context, cacheName, timestamp);
@@ -25,7 +25,6 @@ public class Cache {
             }else{
                 try{
                     ObjectMapper objectMapper = new ObjectMapper();
-                    List<Repository> repositoryListCache = objectMapper.readValue(PreferenceManager.getDefaultSharedPreferences(context).getString(cacheName, ""), new TypeReference<List<Repository>>(){});
                     long cachedTimestamp = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(context).getString(timestamp,""));
                     Long currentTimestamp = System.currentTimeMillis()/1000;
                     if(currentTimestamp - cachedTimestamp > 7200 ){
@@ -38,7 +37,7 @@ public class Cache {
         }
     }
 
-    public static void saveCurrentToCache(List<Repository> repositoryList, Context context, String cacheName, String timestamp){
+    private static void saveCurrentToCache(List<Repository> repositoryList, Context context, String cacheName, String timestamp){
         try{
             ObjectMapper objectMapper = new ObjectMapper();
             String repoListString = objectMapper.writeValueAsString(repositoryList);
@@ -59,9 +58,6 @@ public class Cache {
             if(PreferenceManager.getDefaultSharedPreferences(context).getString(cacheName,"") == null||
                     PreferenceManager.getDefaultSharedPreferences(context).getString(timestamp,"") == null){
                 return false;
-//                noInternetLayout.setVisibility(View.VISIBLE);
-//                shimmerFrameLayout.setVisibility(View.GONE);
-//                shimmerFrameLayout.stopShimmerAnimation();
             }else{
                 return true;
             }

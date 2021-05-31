@@ -54,7 +54,7 @@ public class MainActivityInstrumentedTest {
 
         Thread.sleep(2000);
         //pull to refresh test
-        onView(withId(R.id.repo_scroll_view)).perform(ViewActions.swipeDown());
+        onView(withId(R.id.recycler_view)).perform(ViewActions.swipeDown());
 
         Thread.sleep(1000);
 
@@ -64,8 +64,8 @@ public class MainActivityInstrumentedTest {
 
     private void repoCardTest(){
         for(int i=0;i <6;i++){
-            onView(nthChildOf(withId(R.id.repo_layout), i)).check(matches(isDisplayed())).perform(click());
-            onView(nthChildOf(withId(R.id.repo_layout), i)).check(matches(isDisplayed())).perform(click());
+            onView(nthChildOf(withId(R.id.recycler_view), i)).check(matches(isDisplayed())).perform(click());
+            onView(nthChildOf(withId(R.id.recycler_view), i)).check(matches(isDisplayed())).perform(click());
         }
     }
 

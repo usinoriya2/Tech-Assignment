@@ -136,17 +136,96 @@ public class Repository {
     @SerializedName("deployments_url")
     private String deploymentsUrl;
 
+    @SerializedName("created_at")
+    private String createdAt;
+
+    @SerializedName("updated_at")
+    private String updatedAt;
+
+    @SerializedName("pushed_at")
+    private String pushedAt;
+
+    @SerializedName("git_url")
+    private String gitUrl;
+
+    @SerializedName("ssh_url")
+    private String sshUrl;
+
+    @SerializedName("clone_url")
+    private String cloneUrl;
+
+    @SerializedName("svn_url")
+    private String svnUrl;
+
+    private String homepage;
+
+    private int size;
+
+    @SerializedName("stargazers_count")
+    private int stargazersCount;
+
+    @SerializedName("watchers_count")
+    private int watchersCount;
+
+    private String language;
+
+    @SerializedName("has_issues")
+    private boolean hasIssues;
+
+    @SerializedName("has_projects")
+    private boolean hasProjects;
+
+    @SerializedName("has_downloads")
+    private boolean hasDownloads;
+
+    @SerializedName("has_wiki")
+    private boolean hasWiki;
+
+    @SerializedName("has_pages")
+    private boolean hasPages;
+
+    @SerializedName("forks_count")
+    private int forksCount;
+
+    @SerializedName("mirror_url")
+    private String mirrorUrl;
+
+    private boolean archived;
+
+    private boolean disabled;
+
+    @SerializedName("open_issues_count")
+    private int openIssuesCount;
+
+    private License license;
+
+    private int forks;
+
+    @SerializedName("open_issues")
+    private int openIssues;
+
+    private int watchers;
+
+    @SerializedName("default_branch")
+    private String defaultBranch;
+
+    private double score;
+
+    private boolean isExpended;
+
     public Repository(){
 
     }
 
-    public Repository(int id, String nodeId, String name, String fullName, boolean privateKey, Owner owner, String htmlUrl, String description, boolean fork,
-                      String url, String forksUrl, String keysUrl, String collaboratorsUrl, String teamsUrl, String hooksUrl, String issueEventsUrl,
-                      String eventsUrl, String assigneesUrl, String branchesUrl, String tagsUrl, String blobsUrl, String gitTagsUrl, String gitRefsUrl,
-                      String treesUrl, String statusesUrl, String languagesUrl, String stargazersUrl, String contributorsUrl, String subscribersUrl,
-                      String subscriptionUrl, String commitsUrl, String gitCommitsUrl, String commentsUrl, String issueCommentUrl, String contentsUrl,
-                      String compareUrl, String mergesUrl, String archiveUrl, String downloadsUrl, String issuesUrl, String pullsUrl, String milestonesUrl,
-                      String notificationsUrl, String labelsUrl, String releasesUrl, String deploymentsUrl) {
+    public Repository(int id, String nodeId, String name, String fullName, boolean privateKey, Owner owner, String htmlUrl, String description, boolean fork, String url,
+                      String forksUrl, String keysUrl, String collaboratorsUrl, String teamsUrl, String hooksUrl, String issueEventsUrl, String eventsUrl, String assigneesUrl,
+                      String branchesUrl, String tagsUrl, String blobsUrl, String gitTagsUrl, String gitRefsUrl, String treesUrl, String statusesUrl, String languagesUrl, String stargazersUrl,
+                      String contributorsUrl, String subscribersUrl, String subscriptionUrl, String commitsUrl, String gitCommitsUrl, String commentsUrl, String issueCommentUrl,
+                      String contentsUrl, String compareUrl, String mergesUrl, String archiveUrl, String downloadsUrl, String issuesUrl, String pullsUrl, String milestonesUrl,
+                      String notificationsUrl, String labelsUrl, String releasesUrl, String deploymentsUrl, String createdAt, String updatedAt, String pushedAt, String gitUrl,
+                      String sshUrl, String cloneUrl, String svnUrl, String homepage, int size, int stargazersCount, int watchersCount, String language, boolean hasIssues, boolean hasProjects,
+                      boolean hasDownloads, boolean hasWiki, boolean hasPages, int forksCount, String mirrorUrl, boolean archived, boolean disabled, int openIssuesCount, License license,
+                      int forks, int openIssues, int watchers, String defaultBranch, double score) {
         this.id = id;
         this.nodeId = nodeId;
         this.name = name;
@@ -193,6 +272,34 @@ public class Repository {
         this.labelsUrl = labelsUrl;
         this.releasesUrl = releasesUrl;
         this.deploymentsUrl = deploymentsUrl;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.pushedAt = pushedAt;
+        this.gitUrl = gitUrl;
+        this.sshUrl = sshUrl;
+        this.cloneUrl = cloneUrl;
+        this.svnUrl = svnUrl;
+        this.homepage = homepage;
+        this.size = size;
+        this.stargazersCount = stargazersCount;
+        this.watchersCount = watchersCount;
+        this.language = language;
+        this.hasIssues = hasIssues;
+        this.hasProjects = hasProjects;
+        this.hasDownloads = hasDownloads;
+        this.hasWiki = hasWiki;
+        this.hasPages = hasPages;
+        this.forksCount = forksCount;
+        this.mirrorUrl = mirrorUrl;
+        this.archived = archived;
+        this.disabled = disabled;
+        this.openIssuesCount = openIssuesCount;
+        this.license = license;
+        this.forks = forks;
+        this.openIssues = openIssues;
+        this.watchers = watchers;
+        this.defaultBranch = defaultBranch;
+        this.score = score;
     }
 
     public int getId() {
@@ -259,7 +366,7 @@ public class Repository {
         this.description = description;
     }
 
-    public boolean getFork() {
+    public boolean isFork() {
         return fork;
     }
 
@@ -561,5 +668,237 @@ public class Repository {
 
     public void setDeploymentsUrl(String deploymentsUrl) {
         this.deploymentsUrl = deploymentsUrl;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getPushedAt() {
+        return pushedAt;
+    }
+
+    public void setPushedAt(String pushedAt) {
+        this.pushedAt = pushedAt;
+    }
+
+    public String getGitUrl() {
+        return gitUrl;
+    }
+
+    public void setGitUrl(String gitUrl) {
+        this.gitUrl = gitUrl;
+    }
+
+    public String getSshUrl() {
+        return sshUrl;
+    }
+
+    public void setSshUrl(String sshUrl) {
+        this.sshUrl = sshUrl;
+    }
+
+    public String getCloneUrl() {
+        return cloneUrl;
+    }
+
+    public void setCloneUrl(String cloneUrl) {
+        this.cloneUrl = cloneUrl;
+    }
+
+    public String getSvnUrl() {
+        return svnUrl;
+    }
+
+    public void setSvnUrl(String svnUrl) {
+        this.svnUrl = svnUrl;
+    }
+
+    public String getHomepage() {
+        return homepage;
+    }
+
+    public void setHomepage(String homepage) {
+        this.homepage = homepage;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getStargazersCount() {
+        return stargazersCount;
+    }
+
+    public void setStargazersCount(int stargazersCount) {
+        this.stargazersCount = stargazersCount;
+    }
+
+    public int getWatchersCount() {
+        return watchersCount;
+    }
+
+    public void setWatchersCount(int watchersCount) {
+        this.watchersCount = watchersCount;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public boolean isHasIssues() {
+        return hasIssues;
+    }
+
+    public void setHasIssues(boolean hasIssues) {
+        this.hasIssues = hasIssues;
+    }
+
+    public boolean isHasProjects() {
+        return hasProjects;
+    }
+
+    public void setHasProjects(boolean hasProjects) {
+        this.hasProjects = hasProjects;
+    }
+
+    public boolean isHasDownloads() {
+        return hasDownloads;
+    }
+
+    public void setHasDownloads(boolean hasDownloads) {
+        this.hasDownloads = hasDownloads;
+    }
+
+    public boolean isHasWiki() {
+        return hasWiki;
+    }
+
+    public void setHasWiki(boolean hasWiki) {
+        this.hasWiki = hasWiki;
+    }
+
+    public boolean isHasPages() {
+        return hasPages;
+    }
+
+    public void setHasPages(boolean hasPages) {
+        this.hasPages = hasPages;
+    }
+
+    public int getForksCount() {
+        return forksCount;
+    }
+
+    public void setForksCount(int forksCount) {
+        this.forksCount = forksCount;
+    }
+
+    public String getMirrorUrl() {
+        return mirrorUrl;
+    }
+
+    public void setMirrorUrl(String mirrorUrl) {
+        this.mirrorUrl = mirrorUrl;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public int getOpenIssuesCount() {
+        return openIssuesCount;
+    }
+
+    public void setOpenIssuesCount(int openIssuesCount) {
+        this.openIssuesCount = openIssuesCount;
+    }
+
+    public License getLicense() {
+        return license;
+    }
+
+    public void setLicense(License license) {
+        this.license = license;
+    }
+
+    public int getForks() {
+        return forks;
+    }
+
+    public void setForks(int forks) {
+        this.forks = forks;
+    }
+
+    public int getOpenIssues() {
+        return openIssues;
+    }
+
+    public void setOpenIssues(int openIssues) {
+        this.openIssues = openIssues;
+    }
+
+    public int getWatchers() {
+        return watchers;
+    }
+
+    public void setWatchers(int watchers) {
+        this.watchers = watchers;
+    }
+
+    public String getDefaultBranch() {
+        return defaultBranch;
+    }
+
+    public void setDefaultBranch(String defaultBranch) {
+        this.defaultBranch = defaultBranch;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public boolean isExpended() {
+        return isExpended;
+    }
+
+    public void setExpended(boolean expended) {
+        isExpended = expended;
     }
 }

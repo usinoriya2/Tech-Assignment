@@ -7,8 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     private static Retrofit retrofit = null;
-    private static final String BASE_URL = "https://api.github.com/search/";
-    public static Retrofit getClient() {
+    private static final String BASE_URL = "https://api.github.com/";
+    public static ApiInterface getClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -20,6 +20,6 @@ public class ApiClient {
                 .client(client)
                 .build();
 
-        return retrofit;
+        return retrofit.create(ApiInterface.class);
     }
 }

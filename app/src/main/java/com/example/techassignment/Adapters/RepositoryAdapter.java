@@ -1,19 +1,17 @@
 package com.example.techassignment.Adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.techassignment.Models.Repository;
 import com.example.techassignment.R;
@@ -23,14 +21,12 @@ import java.util.List;
 public class RepositoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Repository> repositoryList;
-
+    private Context context;
     public RepositoryAdapter(List<Repository> repositoryList, Context context){
         this.repositoryList = repositoryList;
+        this.context = context;
     }
 
-    // ... constructor and member variables
-
-    // Usually involves inflating a layout from XML and returning the holder
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
@@ -44,40 +40,58 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return holder;
     }
 
-    // Involves populating data into the item through holder
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         initCardItem((CardViewHolder) holder,position);
     }
 
-    // Returns the total count of items in the list
+
     @Override
     public int getItemCount() {
         if(repositoryList == null)return 0;
         else return repositoryList.size();
     }
 
-    private void initCardItem(CardViewHolder holder,int position){
+    private void initCardItem(final CardViewHolder holder, final int position){
         Repository repository = repositoryList.get(position);
         holder.author.setText(repository.getName());
         holder.repoName.setText(repository.getFullName());
         holder.description.setText(repository.getDescription());
-//        languageColor.setCardBackgroundColor(Color.parseColor(repository.getLanguageColor()));
-//        if(repository.getLanguage() != null && !repository.getLanguage().equals("null")){
-//            language.setText(repository.getLanguage());
-//        }else{
-//            language.setText(R.string.not_available);
-//        }
+        if(repository.getLanguage() != null && !repository.getLanguage().equals("null")){
+            holder.language.setText(repository.getLanguage());
+        }else{
+            holder.language.setText(R.string.not_available);
+        }
 
-//        stars.setText(String.valueOf(repository.getS()));
-//        forks.setText(String.valueOf(repository.getForks()));
+        holder.stars.setText(String.valueOf(repository.getStargazersCount()));
+        holder.forks.setText(String.valueOf(repository.getForks()));
 
         RequestOptions requestOptions = new RequestOptions().override(300, 300);
-//        Glide.with(getApplicationContext()).asBitmap().apply(requestOptions).load(repository.getOwner().getAvatarUrl()).into(avatar);
+        Glide.with(context).asBitmap().apply(requestOptions).load(repository.getOwner().getAvatarUrl()).into(holder.avatar);
+
+        if(repositoryList.get(position).isExpended()){
+            holder.descriptionLayout.setVisibility(View.VISIBLE);
+        }else{
+            holder.descriptionLayout.setVisibility(View.GONE);
+        }
+
+        holder.repository.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(repositoryList.get(position).isExpended()){
+                    holder.descriptionLayout.setVisibility(View.GONE);
+                    repositoryList.get(position).setExpended(false);
+                }else{
+                    holder.descriptionLayout.setVisibility(View.VISIBLE);
+                    repositoryList.get(position).setExpended(true);
+                }
+            }
+        });
     }
 
-    public class CardViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener{
+    public class CardViewHolder extends RecyclerView.ViewHolder {
 
+        private LinearLayout repository;
         private TextView author;
         private TextView repoName;
         private TextView description;
@@ -90,9 +104,8 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         public CardViewHolder(View itemView) {
             super(itemView);
-            itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
 
+            repository = itemView.findViewById(R.id.repository);
             author = itemView.findViewById(R.id.author);
             repoName = itemView.findViewById(R.id.repo_name);
             description = itemView.findViewById(R.id.description);
@@ -104,21 +117,7 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             forks = itemView.findViewById(R.id.forks);
         }
 
-        @Override
-        public void onClick(View v) {
-            if(descriptionLayout.getVisibility() == View.GONE){
-                descriptionLayout.setVisibility(View.VISIBLE);
-            }else{
-                descriptionLayout.setVisibility(View.GONE);
-            }
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            return false;
-        }
     }
-
     public void clear() {
         int size = repositoryList.size();
         repositoryList.clear();
